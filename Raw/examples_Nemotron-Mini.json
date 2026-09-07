@@ -1,0 +1,37 @@
+[
+    {
+        "question": "Were Scott Derrickson and Ed Wood of the same nationality?",
+        "standard_rag_answer": "no",
+        "graderag_answer": "yes",
+        "correct_answer": "yes",
+        "failure_type": "retrieval_failure"
+    },
+    {
+        "question": "What year did Guns N Roses perform a promo for a movie starring Arnold Schwarzenegger as a former New York Police detective?",
+        "standard_rag_answer": "1990",
+        "graderag_answer": "1999",
+        "correct_answer": "1999",
+        "failure_type": "retrieval_failure"
+    },
+    {
+        "question": "The football manager who recruited David Beckham managed Manchester United during what timeframe?",
+        "standard_rag_answer": "1986 to 2013",
+        "graderag_answer": "from 1986 to 2013",
+        "correct_answer": "from 1986 to 2013",
+        "failure_type": "reasoning_failure"
+    },
+    {
+        "question": "Who was the man behind The Chipmunks?",
+        "standard_rag_answer": "Ross Bagdasarian",
+        "graderag_answer": "David Seville",
+        "correct_answer": "David Seville",
+        "failure_type": "reasoning_failure"
+    },
+    {
+        "question": "Which actress was voted Miss Greenwich Village in 1942?",
+        "standard_rag_answer": "Shirley Temple",
+        "graderag_answer": "Lauren Bacall",
+        "correct_answer": "Lauren Bacall",
+        "failure_type": "reasoning_failure"
+    }
+]

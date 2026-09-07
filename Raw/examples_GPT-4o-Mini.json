@@ -1,0 +1,37 @@
+[
+    {
+        "question": "Were Scott Derrickson and Ed Wood of the same nationality?",
+        "standard_rag_answer": "No, Scott Derrickson is an American filmmaker, while Ed Wood was also an American filmmaker. Therefore, they share the same nationality.",
+        "graderag_answer": "Yes.",
+        "correct_answer": "yes",
+        "failure_type": "retrieval_failure"
+    },
+    {
+        "question": "What government position was held by the woman who portrayed Corliss Archer in the film Kiss and Tell?",
+        "standard_rag_answer": "Shirley Temple, who portrayed Corliss Archer in \"Kiss and Tell,\" later held the position of United States Ambassador to Czechoslovakia.",
+        "graderag_answer": "Shirley Temple held the position of Chief of Protocol of the United States.",
+        "correct_answer": "Chief of Protocol",
+        "failure_type": "retrieval_failure"
+    },
+    {
+        "question": "What science fantasy young adult series, told in first person, has a set of companion books narrating the stories of enslaved worlds and alien species?",
+        "standard_rag_answer": "The series you are referring to is likely \"The Last Universe\" series by Victoria Hanley, which includes companion books that explore themes of enslaved worlds and alien species.",
+        "graderag_answer": "The series you are referring to is \"Animorphs\" by K. A. Applegate.",
+        "correct_answer": "Animorphs",
+        "failure_type": "retrieval_failure"
+    },
+    {
+        "question": "The director of the romantic comedy \"Big Stone Gap\" is based in what New York city?",
+        "standard_rag_answer": "The director of \"Big Stone Gap,\" Adriana Trigiani, is based in New York City.",
+        "graderag_answer": "Greenwich Village, New York City.",
+        "correct_answer": "Greenwich Village, New York City",
+        "failure_type": "retrieval_failure"
+    },
+    {
+        "question": "The arena where the Lewiston Maineiacs played their home games can seat how many people?",
+        "standard_rag_answer": "The Androscoggin Bank Colis\u00e9e, where the Lewiston Maineiacs played their home games, can seat 3,677 people.",
+        "graderag_answer": "3,677 seated.",
+        "correct_answer": "3,677 seated",
+        "failure_type": "reasoning_failure"
+    }
+]

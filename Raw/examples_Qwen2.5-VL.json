@@ -1,0 +1,16 @@
+[
+    {
+        "question": "The director of the romantic comedy \"Big Stone Gap\" is based in what New York city?",
+        "standard_rag_answer": "To answer this question, let's break down the information provided:\n\n1. **Film Details**: \"Big Stone Gap\" is described as a 2014 American drama romantic comedy film.\n2. **Director Information**: The film is directed by Adriana Trigiani.\n3. **Production Company**: It is produced by Donna Gigliotti for Altar Identity Studios, a subsidiary of Media Society.\n\nGiven these points, there is no specific mention of the director being based in any particular New York city. The information provided does not give us enough context to determine where Adriana Trigiani is based. Therefore, we cannot definitively state that the director is based in any New York city from the given details.\n\nIf you have additional context",
+        "graderag_answer": "Based on the information provided, we cannot definitively determine the director's location. To answer this question, let's break down the information provided:\n\n1. **Film Details**: \"Big Stone Gap\" is described as a 2014 American drama romantic comedy film.\n2. **Director Information**: The film is directed by Adriana Trigiani.\n3. Greenwich Village, New York City Context:\nBig Stone Gap (film): Big Stone Gap is a 2014 American drama romantic comedy film written and directed by Adriana Trigiani and produced by Donna Gigliotti for Altar Identity Studios, a subsidiary of Media Society. Based on Trigiani's 2000 best-selling novel of the same name,",
+        "correct_answer": "Greenwich Village, New York City",
+        "failure_type": "retrieval_failure"
+    },
+    {
+        "question": "What year did Guns N Roses perform a promo for a movie starring Arnold Schwarzenegger as a former New York Police detective?",
+        "standard_rag_answer": "The provided context does not mention any specific performance or promotional event where Guns N' Roses performed for a movie starring Arnold Schwarzenegger as a former New York Police detective. The information given focuses on Guns N' Roses' discography, Arnold Schwarzenegger's filmography, and Steven Adler's involvement with Guns N' Roses. There is no direct connection or reference to a promotional performance involving both bands and the actor mentioned in the question.\n\nTherefore, based on the available information, it is not possible to determine the exact year when Guns N' Roses performed a promo for a movie starring Arnold Schwarzenegger as a former New York Police detective. The answer cannot be derived from the given context.",
+        "graderag_answer": "To determine the year when Guns N' Roses performed a promo for a movie starring Arnold Schwarzenegger as a former New York Police detective, we need to analyze the provided context carefully. The context mentions several key points:\n\n1. Arnold Schwarzenegger starred in a film titled \"End of Days,\" which was released in 1999.\n2. \"Oh My God\" is a song by Guns N' Roses that was released in 1999 on the soundtrack to the film \"End of Days.\"\n3. The song \"Oh My God\" was sent out to radio stations in November 1999 as a promo for the soundtrack and the band.\n\nGiven these points, it can be inferred that Guns N",
+        "correct_answer": "1999",
+        "failure_type": "retrieval_failure"
+    }
+]
