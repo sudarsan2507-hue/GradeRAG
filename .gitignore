@@ -1,0 +1,17 @@
+# --- Unpublished method: keep local until the paper is out ---
+Code/
+*.ipynb
+Internship_Full_Sudarsan.pdf
+GradeRAG_Verification_Report.pdf
+
+# --- Secrets ---
+.env
+*.key
+**/secrets*
+
+# --- Python / OS cruft ---
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
