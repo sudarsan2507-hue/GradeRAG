@@ -15,24 +15,15 @@ similar past mistakes are pulled back in and used to warn the model away from re
 
 ## How it works (in one picture)
 
-```
-                 ┌─────────────────────────────────────────────┐
-   question ──►  │  Retriever (FAISS + MiniLM)  ──► passages    │
-                 └─────────────────────────────────────────────┘
-                                   │
-             ┌─────────────────────┴─────────────────────┐
-             │  look up similar PAST MISTAKES in the MKG  │  ◄── grows over time
-             └─────────────────────┬─────────────────────┘
-                                   │  "last time a question like this failed
-                                   │   because of X — avoid that"
-                                   ▼
-                 ┌─────────────────────────────────────────────┐
-                 │  LLM generates answer (passages + warnings) │
-                 └─────────────────────┬───────────────────────┘
-                                   ▼
-                          correct?  ──no──►  store new failure in MKG
-                                   │
-                                  yes ──►  done
+```mermaid
+flowchart TD
+    Q([Question]) --> R["Retriever<br/>FAISS + MiniLM"]
+    R -->|passages| M{{"Mistake Knowledge Graph<br/>similar past failures?"}}
+    M -->|"warning: last time, this failed because of X"| G["LLM generates answer<br/>(passages + warnings)"]
+    G --> C{Correct?}
+    C -->|No| S[/Store new failure in MKG/]
+    S -.grows over time.-> M
+    C -->|Yes| D([Done])
 ```
 
 The MKG is just a vector index of past failures. Each node is one mistake
