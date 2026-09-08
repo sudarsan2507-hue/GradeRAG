@@ -39,9 +39,10 @@ The MKG is just a vector index of past failures. Each node is one mistake
 (`question, wrong_answer, correct_answer, failure_type`); edges link mistakes that are
 semantically similar.
 
-![Mistake Knowledge Graph](Resprentation/visualisation.png)
+**▶ [Explore the Mistake Knowledge Graph — interactive](https://sudarsan2507-hue.github.io/GradeRAG/mkg-explorer.html)**
 
-*A slice of the MKG — nodes are stored failures, `SIMILAR_TO` edges connect related ones.*
+Drag the nodes, click one to see the real question, what Standard RAG got wrong, and what
+GradeRAG corrected it to. ([source](docs/mkg-explorer.html))
 
 ---
 

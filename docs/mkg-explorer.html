@@ -1,0 +1,578 @@
+<title>Mistake Knowledge Graph</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#f4f6f9;
+    --surface:#ffffff;
+    --graph-bg:#eef1f6;
+    --ink:#141c28;
+    --muted:#5c6675;
+    --faint:#8a94a4;
+    --line:#dbe1ea;
+    --line-strong:#c3ccd8;
+    --retrieval:#2f6fb0;
+    --reasoning:#b23f7e;
+    --fixed:#1f9d6b;
+    --wrong:#b8404a;
+    --edge:rgba(20,28,40,.16);
+    --edge-hi:rgba(20,28,40,.55);
+    --chip:#eef1f6;
+    --shadow:0 1px 2px rgba(20,28,40,.06),0 8px 30px rgba(20,28,40,.08);
+    --font-sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0c121c;
+      --surface:#141d2a;
+      --graph-bg:#0a0f18;
+      --ink:#e4eaf2;
+      --muted:#96a1b2;
+      --faint:#6a7484;
+      --line:#243040;
+      --line-strong:#31404f;
+      --retrieval:#6aa9e0;
+      --reasoning:#df8fbb;
+      --fixed:#46c8a0;
+      --wrong:#e2727d;
+      --edge:rgba(228,234,242,.14);
+      --edge-hi:rgba(228,234,242,.5);
+      --chip:#1c2735;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 36px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0c121c;
+    --surface:#141d2a;
+    --graph-bg:#0a0f18;
+    --ink:#e4eaf2;
+    --muted:#96a1b2;
+    --faint:#6a7484;
+    --line:#243040;
+    --line-strong:#31404f;
+    --retrieval:#6aa9e0;
+    --reasoning:#df8fbb;
+    --fixed:#46c8a0;
+    --wrong:#e2727d;
+    --edge:rgba(228,234,242,.14);
+    --edge-hi:rgba(228,234,242,.5);
+    --chip:#1c2735;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 36px rgba(0,0,0,.32);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--ground);color:var(--ink);
+    font-family:var(--font-sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:clamp(28px,5vw,64px) clamp(18px,4vw,40px) 72px}
+
+  header{max-width:64ch}
+  .eyebrow{
+    font-family:var(--font-mono);font-size:12px;font-weight:500;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    display:flex;align-items:center;gap:10px;margin:0 0 18px
+  }
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--line-strong)}
+  h1{
+    font-size:clamp(2rem,5vw,3.1rem);font-weight:700;line-height:1.04;
+    letter-spacing:-.02em;margin:0 0 20px;text-wrap:balance
+  }
+  .lede{font-size:clamp(1.02rem,2vw,1.16rem);color:var(--muted);margin:0;max-width:60ch}
+  .lede b{color:var(--ink);font-weight:600}
+
+  .panel{
+    margin-top:clamp(30px,5vw,48px);
+    background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    box-shadow:var(--shadow);overflow:hidden
+  }
+  .panel-head{
+    display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;
+    gap:12px;padding:20px 22px 16px;border-bottom:1px solid var(--line)
+  }
+  .panel-head h2{font-size:1.06rem;font-weight:600;margin:0;letter-spacing:-.01em}
+  .panel-head p{margin:0;font-size:13px;color:var(--faint)}
+
+  .stage{position:relative;background:var(--graph-bg)}
+  canvas{display:block;width:100%;height:560px;touch-action:none}
+  @media (max-width:640px){canvas{height:440px}}
+
+  .tooltip{
+    position:absolute;pointer-events:none;z-index:5;
+    background:var(--surface);border:1px solid var(--line-strong);
+    border-radius:8px;padding:7px 10px;max-width:240px;
+    font-size:12.5px;line-height:1.4;box-shadow:var(--shadow);
+    opacity:0;transform:translateY(3px);transition:opacity .12s
+  }
+  .tooltip.on{opacity:1;transform:none}
+
+  .detail{
+    position:absolute;top:14px;right:14px;width:min(340px,calc(100% - 28px));
+    background:var(--surface);border:1px solid var(--line-strong);border-radius:12px;
+    box-shadow:var(--shadow);padding:18px;z-index:6
+  }
+  .detail[hidden]{display:none}
+  .detail .close{
+    position:absolute;top:10px;right:10px;border:0;background:transparent;
+    color:var(--faint);font-size:18px;line-height:1;cursor:pointer;padding:4px;border-radius:6px
+  }
+  .detail .close:hover{color:var(--ink)}
+  .ftype{
+    display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);
+    font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;
+    padding:4px 9px;border-radius:999px
+  }
+  .ftype .dot{width:8px;height:8px;border-radius:50%}
+  .ftype.retrieval{background:color-mix(in srgb,var(--retrieval) 15%,transparent);color:var(--retrieval)}
+  .ftype.reasoning{background:color-mix(in srgb,var(--reasoning) 15%,transparent);color:var(--reasoning)}
+  .ftype.retrieval .dot{background:var(--retrieval)}
+  .ftype.reasoning .dot{background:var(--reasoning)}
+  .detail .q{font-size:14.5px;font-weight:600;margin:12px 0 14px;line-height:1.45}
+  .ans{display:flex;gap:9px;font-size:13px;margin:8px 0;align-items:flex-start}
+  .ans .k{
+    font-family:var(--font-mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--faint);flex:0 0 68px;padding-top:2px
+  }
+  .ans .v{flex:1}
+  .ans.bad .v{color:var(--wrong)}
+  .ans.good .v{color:var(--fixed);font-weight:600}
+  .ans.good .v::before{content:"✓ ";font-weight:700}
+  .seen{margin-top:14px;padding-top:13px;border-top:1px solid var(--line)}
+  .seen .k{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:7px}
+  .mchip{
+    display:inline-block;font-family:var(--font-mono);font-size:11px;
+    background:var(--chip);color:var(--muted);border-radius:6px;padding:3px 7px;margin:0 5px 5px 0
+  }
+
+  .controls{
+    display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;
+    padding:14px 22px;border-top:1px solid var(--line)
+  }
+  .legend{display:flex;gap:16px;flex-wrap:wrap}
+  .legend span{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
+  .legend i{width:10px;height:10px;border-radius:50%}
+  .legend .r{background:var(--retrieval)}
+  .legend .s{background:var(--reasoning)}
+  .btn{
+    margin-left:auto;font-family:var(--font-mono);font-size:12px;font-weight:500;
+    letter-spacing:.03em;color:var(--ink);background:var(--chip);
+    border:1px solid var(--line-strong);border-radius:8px;padding:7px 13px;cursor:pointer
+  }
+  .btn:hover{border-color:var(--muted)}
+  .btn:focus-visible,.idx button:focus-visible,.detail .close:focus-visible{
+    outline:2px solid var(--retrieval);outline-offset:2px
+  }
+
+  .idx{display:flex;flex-wrap:wrap;gap:7px;padding:0 22px 20px}
+  .idx button{
+    font-family:var(--font-mono);font-size:11.5px;color:var(--muted);
+    background:transparent;border:1px solid var(--line);border-radius:999px;
+    padding:5px 11px;cursor:pointer;transition:border-color .12s,color .12s
+  }
+  .idx button:hover{color:var(--ink);border-color:var(--line-strong)}
+  .idx button[aria-pressed="true"]{color:var(--ink);border-color:var(--ink);font-weight:500}
+
+  .read{
+    font-size:13.5px;color:var(--muted);margin:20px 2px 0;max-width:62ch
+  }
+  .read code{
+    font-family:var(--font-mono);font-size:.92em;background:var(--chip);
+    padding:1px 5px;border-radius:4px;color:var(--ink)
+  }
+
+  .results{margin-top:clamp(40px,7vw,72px)}
+  .results h2{font-size:1.3rem;font-weight:700;letter-spacing:-.015em;margin:0 0 6px}
+  .results .sub{color:var(--muted);font-size:14px;margin:0 0 26px;max-width:58ch}
+  .bars{display:grid;gap:18px}
+  .bar-row{
+    display:grid;grid-template-columns:170px 1fr auto;gap:16px;align-items:center
+  }
+  @media (max-width:620px){
+    .bar-row{grid-template-columns:1fr;gap:6px}
+    .bar-row .delta{justify-self:start}
+  }
+  .bar-row .rl{font-size:13px;font-weight:500}
+  .bar-row .rl span{display:block;font-family:var(--font-mono);font-size:11px;color:var(--faint);font-weight:400}
+  .track{position:relative;height:34px}
+  .seg{
+    position:absolute;left:0;height:14px;border-radius:4px;display:flex;align-items:center;
+    font-family:var(--font-mono);font-size:11px;font-variant-numeric:tabular-nums
+  }
+  .seg.base{top:0;background:var(--line-strong)}
+  .seg.grade{bottom:0;background:var(--fixed)}
+  .seg .tag{position:absolute;left:calc(100% + 6px);white-space:nowrap;color:var(--muted)}
+  .seg.grade .tag{color:var(--fixed);font-weight:600}
+  .delta{
+    font-family:var(--font-mono);font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;
+    padding:3px 8px;border-radius:6px;
+    background:color-mix(in srgb,var(--fixed) 14%,transparent);color:var(--fixed)
+  }
+  .delta.neg{background:color-mix(in srgb,var(--wrong) 14%,transparent);color:var(--wrong)}
+  .rnote{margin-top:20px;font-size:12.5px;color:var(--faint);max-width:60ch}
+
+  footer{
+    margin-top:56px;padding-top:22px;border-top:1px solid var(--line);
+    font-family:var(--font-mono);font-size:12px;color:var(--faint);
+    display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:space-between
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important}
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">GradeRAG · component</p>
+    <h1>The Mistake Knowledge Graph</h1>
+    <p class="lede">Every wrong answer the system produces is dissected, labelled by cause, and stored as a node in this graph. When a new question resembles a past mistake, that node is retrieved and handed back to the model as a warning — so <b>the same error is not made twice</b>.</p>
+  </header>
+
+  <section class="panel" aria-label="Interactive mistake graph">
+    <div class="panel-head">
+      <h2>Recorded failures &amp; their similarity links</h2>
+      <p>Real cases from the HotpotQA / TriviaQA runs</p>
+    </div>
+    <div class="stage">
+      <canvas id="c" aria-label="Force-directed graph of recorded question-answering failures. Use the buttons below to inspect each node."></canvas>
+      <div class="tooltip" id="tip"></div>
+      <div class="detail" id="detail" hidden>
+        <button class="close" id="close" aria-label="Close detail">×</button>
+        <span class="ftype" id="d-type"><span class="dot"></span><span id="d-type-t"></span></span>
+        <p class="q" id="d-q"></p>
+        <div class="ans bad"><span class="k">Standard RAG</span><span class="v" id="d-sr"></span></div>
+        <div class="ans good"><span class="k">GradeRAG</span><span class="v" id="d-gr"></span></div>
+        <div class="ans"><span class="k">Gold</span><span class="v" id="d-gold"></span></div>
+        <div class="seen"><span class="k">Recorded from</span><span id="d-models"></span></div>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="legend">
+        <span><i class="r"></i>retrieval failure — the right passage was never fetched</span>
+        <span><i class="s"></i>reasoning failure — the passage was there, mis-used</span>
+      </div>
+      <button class="btn" id="replay">↻ Replay growth</button>
+    </div>
+    <div class="idx" id="idx" role="group" aria-label="Select a failure to inspect"></div>
+  </section>
+
+  <p class="read">Each circle is one entry in the graph, keyed by <code>failure_type</code>. Lines join entries whose questions the retriever embeds close together — that proximity is exactly what lets a fresh query pull up an old mistake. Drag a node, or pick one below the graph.</p>
+
+  <section class="results">
+    <h2>What the stored mistakes buy back</h2>
+    <p class="sub">Exact-match accuracy, standard retrieval vs. the same pipeline with the Mistake Knowledge Graph attached.</p>
+    <div class="bars" id="bars"></div>
+    <p class="rnote">GPT-4o-Mini: 200 questions per dataset. Nemotron-Mini and Qwen2.5-VL: 15-question pilots — directional only. The single regression (Qwen2.5-VL / TriviaQA) is shown as measured.</p>
+  </section>
+
+  <footer>
+    <span>Part of the GradeRAG project</span>
+    <span>results in this repository · full method on publication</span>
+  </footer>
+</div>
+
+<script>
+const NODES = [
+  {id:"n1",label:"Derrickson / Ed Wood",type:"retrieval",
+   q:"Were Scott Derrickson and Ed Wood of the same nationality?",
+   sr:"No — hedged across a paragraph, never commits.", gr:"Yes.", gold:"yes",
+   models:["GPT-4o-Mini","Nemotron-Mini"]},
+  {id:"n2",label:"Corliss Archer role",type:"retrieval",
+   q:"What government position was held by the woman who portrayed Corliss Archer in the film Kiss and Tell?",
+   sr:"Shirley Temple — US Ambassador to Czechoslovakia.", gr:"Shirley Temple held the position of Chief of Protocol of the United States.", gold:"Chief of Protocol",
+   models:["GPT-4o-Mini"]},
+  {id:"n3",label:"Animorphs series",type:"retrieval",
+   q:"What science-fantasy young-adult series, told in first person, has companion books narrating the stories of enslaved worlds and alien species?",
+   sr:"“The Last Universe” by Victoria Hanley.", gr:"“Animorphs” by K. A. Applegate.", gold:"Animorphs",
+   models:["GPT-4o-Mini"]},
+  {id:"n4",label:"Big Stone Gap city",type:"retrieval",
+   q:"The director of the romantic comedy “Big Stone Gap” is based in what New York city?",
+   sr:"New York City.", gr:"Greenwich Village, New York City.", gold:"Greenwich Village, New York City",
+   models:["GPT-4o-Mini","Qwen2.5-VL"]},
+  {id:"n5",label:"Maineiacs arena seats",type:"reasoning",
+   q:"The arena where the Lewiston Maineiacs played their home games can seat how many people?",
+   sr:"3,677 people — wrapped in extra prose.", gr:"3,677 seated.", gold:"3,677 seated",
+   models:["GPT-4o-Mini"]},
+  {id:"n6",label:"GNR promo year",type:"retrieval",
+   q:"What year did Guns N’ Roses perform a promo for a movie starring Arnold Schwarzenegger as a former New York police detective?",
+   sr:"1990.", gr:"1999.", gold:"1999",
+   models:["Nemotron-Mini","Qwen2.5-VL"]},
+  {id:"n7",label:"Beckham’s manager",type:"reasoning",
+   q:"The football manager who recruited David Beckham managed Manchester United during what timeframe?",
+   sr:"1986 to 2013.", gr:"from 1986 to 2013.", gold:"from 1986 to 2013",
+   models:["Nemotron-Mini"]},
+  {id:"n8",label:"Behind The Chipmunks",type:"reasoning",
+   q:"Who was the man behind The Chipmunks?",
+   sr:"Ross Bagdasarian.", gr:"David Seville.", gold:"David Seville",
+   models:["Nemotron-Mini"]},
+  {id:"n9",label:"Miss Greenwich Village",type:"reasoning",
+   q:"Which actress was voted Miss Greenwich Village in 1942?",
+   sr:"Shirley Temple.", gr:"Lauren Bacall.", gold:"Lauren Bacall",
+   models:["Nemotron-Mini"]}
+];
+const EDGES = [
+  ["n2","n9"],["n2","n4"],["n4","n9"],["n4","n6"],["n6","n3"],
+  ["n5","n7"],["n7","n8"],["n8","n9"],["n1","n8"],["n1","n5"],["n3","n1"]
+];
+const RESULTS = [
+  {m:"GPT-4o-Mini",d:"HotpotQA",b:58.0,g:87.5},
+  {m:"GPT-4o-Mini",d:"TriviaQA",b:73.0,g:86.5},
+  {m:"Nemotron-Mini",d:"HotpotQA",b:60.0,g:80.0},
+  {m:"Nemotron-Mini",d:"TriviaQA",b:73.3,g:86.7},
+  {m:"Qwen2.5-VL",d:"HotpotQA",b:60.0,g:73.3},
+  {m:"Qwen2.5-VL",d:"TriviaQA",b:80.0,g:66.7}
+];
+
+/* ---------- results bars ---------- */
+const barsEl = document.getElementById("bars");
+RESULTS.forEach(r=>{
+  const delta = +(r.g - r.b).toFixed(1);
+  const row = document.createElement("div");
+  row.className = "bar-row";
+  row.innerHTML =
+    `<div class="rl">${r.m}<span>${r.d}</span></div>`+
+    `<div class="track">`+
+      `<div class="seg base" style="width:${r.b}%"><span class="tag">${r.b.toFixed(1)}% standard</span></div>`+
+      `<div class="seg grade" style="width:${r.g}%"><span class="tag">${r.g.toFixed(1)}% GradeRAG</span></div>`+
+    `</div>`+
+    `<div class="delta ${delta<0?'neg':''}">${delta>0?'+':''}${delta} pt</div>`;
+  barsEl.appendChild(row);
+});
+
+/* ---------- graph ---------- */
+const cv = document.getElementById("c");
+const ctx = cv.getContext("2d");
+const tip = document.getElementById("tip");
+const detail = document.getElementById("detail");
+const idxWrap = document.getElementById("idx");
+let W=0,H=0,dpr=1;
+
+const byId = Object.fromEntries(NODES.map(n=>[n.id,n]));
+NODES.forEach((n,i)=>{
+  const a = (i/NODES.length)*Math.PI*2;
+  n.x = 0.5 + Math.cos(a)*0.28;
+  n.y = 0.5 + Math.sin(a)*0.28;
+  n.vx = 0; n.vy = 0; n.fixed = false;
+  n.appear = 1;
+});
+const adj = {};
+NODES.forEach(n=>adj[n.id]=new Set());
+EDGES.forEach(([a,b])=>{adj[a].add(b);adj[b].add(a);});
+
+let paletteCache=null;
+function pal(){
+  if(paletteCache) return paletteCache;
+  const cs = getComputedStyle(document.documentElement);
+  paletteCache = {
+    retrieval:cs.getPropertyValue("--retrieval").trim(),
+    reasoning:cs.getPropertyValue("--reasoning").trim(),
+    edge:cs.getPropertyValue("--edge").trim(),
+    edgeHi:cs.getPropertyValue("--edge-hi").trim(),
+    label:cs.getPropertyValue("--ink").trim(),
+    faint:cs.getPropertyValue("--faint").trim(),
+    bg:cs.getPropertyValue("--graph-bg").trim()
+  };
+  return paletteCache;
+}
+const invalidate=()=>{paletteCache=null;};
+matchMedia("(prefers-color-scheme:dark)").addEventListener("change",invalidate);
+new MutationObserver(invalidate).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+function resize(){
+  const r = cv.getBoundingClientRect();
+  dpr = Math.min(window.devicePixelRatio||1,2);
+  W = r.width; H = r.height;
+  cv.width = W*dpr; cv.height = H*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+window.addEventListener("resize",resize);
+
+const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+let hovered=null, selected=null, dragging=null, growth=1, t0=performance.now();
+
+function px(n){return {x:n.x*W, y:n.y*H};}
+
+function step(){
+  const REP=0.020, SPR=0.0016, REST=0.19, GRAV=0.010, DAMP=0.86;
+  for(let i=0;i<NODES.length;i++){
+    const a=NODES[i];
+    if(a.fixed) continue;
+    for(let j=0;j<NODES.length;j++){
+      if(i===j) continue;
+      const b=NODES[j];
+      let dx=a.x-b.x, dy=a.y-b.y;
+      let d2=dx*dx+dy*dy+1e-4;
+      let f=REP/d2;
+      const d=Math.sqrt(d2);
+      a.vx+=f*dx/d; a.vy+=f*dy/d;
+    }
+    a.vx+=(0.5-a.x)*GRAV; a.vy+=(0.5-a.y)*GRAV;
+  }
+  EDGES.forEach(([ia,ib])=>{
+    const a=byId[ia], b=byId[ib];
+    let dx=b.x-a.x, dy=b.y-a.y;
+    let d=Math.hypot(dx,dy)+1e-4;
+    let f=SPR*(d-REST);
+    const ux=dx/d, uy=dy/d;
+    if(!a.fixed){a.vx+=f*ux; a.vy+=f*uy;}
+    if(!b.fixed){b.vx-=f*ux; b.vy-=f*uy;}
+  });
+  NODES.forEach(n=>{
+    if(n.fixed) return;
+    n.vx*=DAMP; n.vy*=DAMP;
+    n.x+=n.vx; n.y+=n.vy;
+    n.x=Math.max(0.06,Math.min(0.94,n.x));
+    n.y=Math.max(0.08,Math.min(0.92,n.y));
+  });
+}
+for(let i=0;i<520;i++) step();
+
+function draw(now){
+  const p=pal();
+  const R=22;
+  ctx.clearRect(0,0,W,H);
+
+  if(!reduce && growth<1) growth=Math.min(1,growth+0.012);
+  const vis = growth>=1 ? NODES.length : Math.max(1,Math.floor(growth*NODES.length)+1);
+  NODES.forEach((n,i)=> n.appear = i<vis ? Math.min(1,n.appear+0.14) : 0);
+
+  const near = hovered||selected;
+  const lit = near ? new Set([near.id,...adj[near.id]]) : null;
+
+  EDGES.forEach(([ia,ib])=>{
+    const a=byId[ia], b=byId[ib];
+    if(a.appear<0.05||b.appear<0.05) return;
+    const on = lit && lit.has(ia) && lit.has(ib);
+    const pa=px(a), pb=px(b);
+    ctx.beginPath();
+    ctx.moveTo(pa.x,pa.y); ctx.lineTo(pb.x,pb.y);
+    ctx.strokeStyle = on ? p.edgeHi : p.edge;
+    ctx.lineWidth = on ? 1.8 : 1;
+    ctx.globalAlpha = lit && !on ? 0.35 : 1;
+    ctx.stroke();
+    ctx.globalAlpha=1;
+  });
+
+  const drift = reduce ? 0 : (now-t0)/1000;
+  NODES.forEach((n,i)=>{
+    if(n.appear<0.02) return;
+    const wob = reduce ? 0 : Math.sin(drift*0.7 + i*1.7)*1.1;
+    const pos=px(n);
+    const x=pos.x, y=pos.y+wob;
+    n._sx=x; n._sy=y;
+    const col = n.type==="retrieval" ? p.retrieval : p.reasoning;
+    const dim = lit && !lit.has(n.id);
+    const isSel = selected && selected.id===n.id;
+    const sc = n.appear;
+
+    ctx.globalAlpha = dim ? 0.28 : 1;
+
+    ctx.beginPath();
+    ctx.arc(x,y,R*sc,0,7);
+    ctx.fillStyle = col;
+    ctx.fill();
+    if(isSel || (hovered&&hovered.id===n.id)){
+      ctx.lineWidth=3; ctx.strokeStyle=col;
+      ctx.globalAlpha=(dim?0.28:1)*0.35;
+      ctx.beginPath(); ctx.arc(x,y,R*sc+5,0,7); ctx.stroke();
+      ctx.globalAlpha = dim?0.28:1;
+    }
+
+    ctx.fillStyle="#fff";
+    ctx.font="600 11px "+getComputedStyle(document.body).fontFamily;
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(String(i+1), x, y);
+
+    ctx.fillStyle = (isSel? p.label : p.faint);
+    ctx.font=(isSel?"600 ":"400 ")+"11.5px "+getComputedStyle(document.body).fontFamily;
+    ctx.fillText(n.label, x, y + R*sc + 13);
+
+    ctx.globalAlpha=1;
+  });
+
+  requestAnimationFrame(draw);
+}
+
+function hit(mx,my){
+  let best=null,bd=1e9;
+  NODES.forEach(n=>{
+    if(n.appear<0.5) return;
+    const d=Math.hypot(mx-n._sx,my-n._sy);
+    if(d<26 && d<bd){bd=d;best=n;}
+  });
+  return best;
+}
+function evtPos(e){
+  const r=cv.getBoundingClientRect();
+  return [e.clientX-r.left, e.clientY-r.top];
+}
+cv.addEventListener("pointermove",e=>{
+  const [mx,my]=evtPos(e);
+  if(dragging){
+    dragging.x=Math.max(0.06,Math.min(0.94,mx/W));
+    dragging.y=Math.max(0.08,Math.min(0.92,my/H));
+    return;
+  }
+  const h=hit(mx,my);
+  hovered=h;
+  cv.style.cursor = h ? "pointer":"default";
+  if(h){
+    tip.textContent=h.q;
+    tip.style.left=Math.min(mx+14,W-250)+"px";
+    tip.style.top=(my+14)+"px";
+    tip.classList.add("on");
+  }else tip.classList.remove("on");
+});
+cv.addEventListener("pointerleave",()=>{hovered=null;tip.classList.remove("on");});
+cv.addEventListener("pointerdown",e=>{
+  const [mx,my]=evtPos(e);
+  const h=hit(mx,my);
+  if(h){
+    dragging=h; h.fixed=true; cv.setPointerCapture(e.pointerId);
+    select(h);
+  }else{
+    select(null);
+  }
+});
+cv.addEventListener("pointerup",e=>{
+  if(dragging){dragging.fixed=false;dragging=null;}
+});
+
+function select(n){
+  selected=n;
+  document.querySelectorAll(".idx button").forEach(b=>
+    b.setAttribute("aria-pressed", String(!!n && b.dataset.id===n.id)));
+  if(!n){detail.hidden=true;return;}
+  detail.hidden=false;
+  const tp=document.getElementById("d-type");
+  tp.className="ftype "+n.type;
+  document.getElementById("d-type-t").textContent=n.type.replace("_"," ");
+  document.getElementById("d-q").textContent=n.q;
+  document.getElementById("d-sr").textContent=n.sr;
+  document.getElementById("d-gr").textContent=n.gr;
+  document.getElementById("d-gold").textContent=n.gold;
+  document.getElementById("d-models").innerHTML=n.models.map(m=>`<span class="mchip">${m}</span>`).join("");
+}
+document.getElementById("close").addEventListener("click",()=>select(null));
+
+NODES.forEach((n,i)=>{
+  const b=document.createElement("button");
+  b.textContent=(i+1)+" · "+n.label;
+  b.dataset.id=n.id;
+  b.setAttribute("aria-pressed","false");
+  b.addEventListener("click",()=>select(selected&&selected.id===n.id?null:n));
+  idxWrap.appendChild(b);
+});
+
+document.getElementById("replay").addEventListener("click",()=>{
+  growth=0; t0=performance.now();
+  NODES.forEach(n=>n.appear=0);
+});
+
+resize();
+if(reduce){ growth=1; NODES.forEach(n=>n.appear=1); }
+requestAnimationFrame(draw);
+</script>
