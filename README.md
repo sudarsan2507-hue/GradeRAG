@@ -6,6 +6,8 @@ mistakes**. Instead of answering every question from scratch, it keeps a growing
 labelled (e.g. *retrieval failure*, *reasoning failure*) and stored. On future questions,
 similar past mistakes are pulled back in and used to warn the model away from repeating them.
 
+Built during my NLP research internship at **NIT Trichy** (May to June 2026).
+
 > **Status:** the paper describing the method is under review. This repository currently
 > publishes only the **experimental results and analysis**. The full implementation
 > (the MKG, the GradeRAG loop, and the evaluation harness) will be added here once the
@@ -30,7 +32,7 @@ The MKG is just a vector index of past failures. Each node is one mistake
 (`question, wrong_answer, correct_answer, failure_type`); edges link mistakes that are
 semantically similar.
 
-**▶ [Explore the Mistake Knowledge Graph — interactive](https://sudarsan2507-hue.github.io/GradeRAG/mkg-explorer.html)**
+**▶ [Explore the Mistake Knowledge Graph - interactive](https://sudarsan2507-hue.github.io/GradeRAG/mkg-explorer.html)**
 
 Drag the nodes, click one to see the real question, what Standard RAG got wrong, and what
 GradeRAG corrected it to. ([source](docs/mkg-explorer.html))
@@ -41,11 +43,11 @@ GradeRAG corrected it to. ([source](docs/mkg-explorer.html))
 
 ![Combined results across 3 models](Resprentation/GradeRAG_Chart.png)
 
-- **Top row — accuracy:** GradeRAG (purple) beats Standard RAG (blue) on 5 of 6
+- **Top row - accuracy:** GradeRAG (purple) beats Standard RAG (blue) on 5 of 6
   model/dataset combinations.
-- **Bottom-left — Mistake Avoidance Rate (MAR):** how often GradeRAG now gets right the
+- **Bottom-left - Mistake Avoidance Rate (MAR):** how often GradeRAG now gets right the
   kind of question it previously got wrong.
-- **Bottom-right — improvement:** percentage-point change vs the baseline. Up to **+29.5 pts**
+- **Bottom-right - improvement:** percentage-point change vs the baseline. Up to **+29.5 pts**
   (GPT-4o-Mini on HotpotQA). The one regression is Qwen2.5-VL on TriviaQA (−13.3 pts,
   15-question pilot).
 
@@ -61,7 +63,7 @@ GradeRAG corrected it to. ([source](docs/mkg-explorer.html))
 | Qwen2.5-VL | TriviaQA | 80.0% | 66.7% | −13.3 |
 
 > GPT-4o-Mini uses 200 questions per dataset. Nemotron-Mini and Qwen2.5-VL are
-> 15-question pilots — read them as directional, not definitive.
+> 15-question pilots - read them as directional, not definitive.
 
 ---
 
@@ -97,7 +99,7 @@ graph fills up.
 
 | | |
 |---|---|
-| **Datasets** | HotpotQA (distractor) · TriviaQA (rc) — validation split |
+| **Datasets** | HotpotQA (distractor) · TriviaQA (rc) - validation split |
 | **Retriever** | `all-MiniLM-L6-v2` sentence embeddings over a FAISS index |
 | **Generators** | GPT-4o-Mini · Nemotron-Mini · Qwen2.5-VL |
 | **Conditions** | `baseline` = standard RAG · `graderag` = RAG + Mistake Knowledge Graph |
@@ -111,10 +113,10 @@ graph fills up.
 |---|---|
 | [`Raw/`](Raw/) | Per-question result CSVs (`results_<model>_<dataset>_<condition>.csv`), qualitative answer comparisons (`examples_*.json`), and the figures above. |
 | [`Resprentation/`](Resprentation/) | Aggregated spreadsheet and summary charts. |
-| `Code/` | *Not published yet — added on paper publication.* |
+| `Code/` | *Not published yet - added on paper publication.* |
 
 **CSV columns:** `id, question, ground_truth, retrieved_docs, predicted, correct, f1_score, faithfulness`
-— GradeRAG files add `mkg_matched` (whether a stored failure pattern fired for that query).
+GradeRAG files also add `mkg_matched` (whether a stored failure pattern fired for that query).
 
 ---
 
